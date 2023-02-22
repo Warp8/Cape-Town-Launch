@@ -1,6 +1,6 @@
 /* STOCKBRIDGE SPECIAL PROJECTS LAB CAPETOWN LAUNCH CODE */
 /* Designed for the CWV Module with Gas - SGP30 */
-/* IMU - LIS2DH12, and Altitude - SPL06 */
+/* IMU - KXTJ3-1057, and Altitude - SPL06 */
 
 /* --- Headers --- */
 #include <Arduino.h>
@@ -11,7 +11,7 @@
 
 /* --- Sensors --- */
 #include <SPL06-007.h> // Altitude (you may have to modify the I2C address in the library to 0x77)
-#include "SparkFun_LIS2DH12.h" // IMU
+#include "kxtj3-1057.h" // IMU (Using new xChips IMU)
 #include "SparkFun_SGP30_Arduino_Library.h" // Gas Sensor
 
 /* --- SD Card/SPI pins --- */
@@ -32,7 +32,7 @@ double localPressure = 1013.3; // Local pressure in hPa (Cape Town South Africa)
 String header = "Time,Temperature C,Pressure mb,Altitude M,Acell X,Acell Y,Acell Z,CO2 ppm,TVOC ppb";
 
 SPIClass spi = SPIClass(HSPI); //It's important this is outside of the setup function for some reason
-SPARKFUN_LIS2DH12 accel;
+KXTJ3 accel(0x0F);
 SGP30 sgp30;
 
 String dataPath = "/" + defaultDataFileName + ".csv";
@@ -58,9 +58,9 @@ void takeReadings() {
     String(get_temp_c()) + "," +
     String(get_pressure()) + "," +
     String(get_altitude(get_pressure(),localPressure)) + "," +
-    String(accel.getX()) + "," +
-    String(accel.getY()) + "," +
-    String(accel.getZ()) + "," +
+    String(accel.axisAccel(X), 4) + "," +
+    String(accel.axisAccel(Y), 4) + "," +
+    String(accel.axisAccel(Z), 4) + "," +
     String(sgp30.CO2) + "," +
     String(sgp30.TVOC);
   Serial.println(String(millis()) + " Finished measuring sensors");
@@ -78,11 +78,10 @@ void initializeSensors() {
     sgp30.initAirQuality();
   }
 
-  if (!accel.begin()) {
-    log("LIS2DH12 not found");
-    return;
+  if(accel.begin(6.25, 16) != 0 ) { // 6.25Hz sample rate, 16g range
+    log("IMU not found");
   } else {
-    log("LIS2DH12 found");
+    log("IMU found");
   }
 
   SPL_init(0x77);
@@ -146,16 +145,16 @@ void setup() {
 
 void loop() {
   if (millis() % 150 == 0) {
+    accel.standby(false);
     if (hasLaunched == true) {
-      //log("Taking readings");
       takeReadings();
-      //log("Finished taking readings");
     }
     // Check if the accelerometer is moving and take readings if it is to save power and space on the SD card.
     // The threshold must be more than the force of gravity (9810) to prevent false positives
-    if ((accel.getX() > threshold or accel.getX() < -threshold or accel.getY() > threshold or accel.getY() < -threshold or accel.getZ() > threshold or accel.getZ() < -threshold) and hasLaunched == false) {
+    if ((accel.axisAccel(X) > threshold or accel.axisAccel(X) < -threshold or accel.axisAccel(Y) > threshold or accel.axisAccel(Y) < -threshold or accel.axisAccel(Z) > threshold or accel.axisAccel(Z) < -threshold) and hasLaunched == false) {
       log("Rocket Launch Detected at " + String(millis()/60000) + " minutes");
       hasLaunched = true;
     }
+    accel.standby(true);
   }
 }
