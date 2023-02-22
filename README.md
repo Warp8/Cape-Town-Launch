@@ -9,4 +9,7 @@ NOTE: This code will only work consistently if the zero resistors labeled INT1 a
 
 ALSO: If you are trying to compile and run this code yourself (via PlatformIO) you must either download and use the included PlatformIO workspace OR modify your SPL06-007 library to modify the built in I2C address as it doesn't let you do this any other way on this version of the library. The address you need to change it to is in the comments of the code.
 
+This is what your hardware should look like if you are replicating this configuration.
+![IMG_20230221_135205](https://user-images.githubusercontent.com/22381811/220488130-2704702e-7b64-4b8f-b166-e6caea7a9caa.jpg)
+
 This code is open source and you are free to modify it according to the liscence. 
