@@ -1,3 +1,4 @@
+![Special-Projects-Lab-Logo-BW](https://user-images.githubusercontent.com/22381811/221216441-0308e739-31b6-4197-8540-0f042f9e8010.png)
 # Stockbridge Cape Town Launch
 Stockbridge Special Projects Lab sensor logging code designed for the Cape Town Launch in March of 2023.
 This code is made for the xChips extended core module along with these xChips sensors:
