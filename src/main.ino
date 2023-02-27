@@ -26,7 +26,7 @@
 
 String defaultDataFileName = "data";
 String defaultLogPath = "/log.txt";
-int threshold = 2500; // (2.5Gs of force) Threshold for the accelerometer to initiate the rest of the script (to stop from reading before the rocket is launched) mm/s^2
+int threshold = 6; // (6Gs of force) Threshold for the accelerometer to initiate the rest of the script (to stop from reading before the rocket is launched) m/s^2
 bool hasLaunched = false;
 double localPressure = 1013.3; // Local pressure in hPa (Cape Town South Africa)
 String header = "Time,Temperature C,Pressure mb,Altitude M,Acell X,Acell Y,Acell Z,CO2 ppm,TVOC ppb";
@@ -78,7 +78,7 @@ void initializeSensors() {
     sgp30.initAirQuality();
   }
 
-  if(accel.begin(6.25, 16) != 0 ) { // 6.25Hz sample rate, 16g range
+  if(accel.begin(6.25, 8) != 0 ) { // 6.25Hz sample rate, 8g range. anything over 8g is innacurate
     log("IMU not found");
   } else {
     log("IMU found");
@@ -90,6 +90,8 @@ void initializeSensors() {
     return;
   }
   log("SPL06-007 found");
+
+  accel.intConf(123, 1, 10, HIGH);
 }
 
 void initializeSD() {
