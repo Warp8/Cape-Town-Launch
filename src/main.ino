@@ -28,7 +28,7 @@
 
 String defaultDataFileName = "data";
 String defaultLogPath = "/log.txt";
-int threshold = 0; // (6Gs of force) Threshold for the accelerometer to initiate the rest of the script (to stop from reading before the rocket is launched) m/s^2
+int threshold = 6; // (6Gs of force) Threshold for the accelerometer to initiate the rest of the script (to stop from reading before the rocket is launched) m/s^2
 bool hasLaunched = false;
 double localPressure = 1013.3; // Local pressure in hPa (Cape Town South Africa)
 String header = "Time,Temperature C,Pressure mb,Altitude M,Acell X,Acell Y,Acell Z,Magnitude,CO2 ppm,TVOC ppb";
