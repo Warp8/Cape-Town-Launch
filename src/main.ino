@@ -24,12 +24,14 @@
 #define I2C_SDA 26
 #define I2C_SCL 27
 
+#define HIGH_RESOLUTION
+
 String defaultDataFileName = "data";
 String defaultLogPath = "/log.txt";
-int threshold = 6; // (6Gs of force) Threshold for the accelerometer to initiate the rest of the script (to stop from reading before the rocket is launched) m/s^2
+int threshold = 0; // (6Gs of force) Threshold for the accelerometer to initiate the rest of the script (to stop from reading before the rocket is launched) m/s^2
 bool hasLaunched = false;
 double localPressure = 1013.3; // Local pressure in hPa (Cape Town South Africa)
-String header = "Time,Temperature C,Pressure mb,Altitude M,Acell X,Acell Y,Acell Z,CO2 ppm,TVOC ppb";
+String header = "Time,Temperature C,Pressure mb,Altitude M,Acell X,Acell Y,Acell Z,Magnitude,CO2 ppm,TVOC ppb";
 
 SPIClass spi = SPIClass(HSPI); //It's important this is outside of the setup function for some reason
 KXTJ3 accel(0x0F);
@@ -52,15 +54,21 @@ void write(String path, String data) {
 void takeReadings() {
   Serial.println(String(millis()) + " Measuring Sensors");
   sgp30.measureAirQuality();
+  // Magnitude vector of the acceleration
+  float x = accel.axisAccel(X);
+  float y = accel.axisAccel(Y);
+  float z = accel.axisAccel(Z);
+  float magnitude = sqrt(x*x + y*y + z*z);
   String data = "";
   data += 
     String(millis()) + "," +
     String(get_temp_c()) + "," +
     String(get_pressure()) + "," +
     String(get_altitude(get_pressure(),localPressure)) + "," +
-    String(accel.axisAccel(X), 4) + "," +
-    String(accel.axisAccel(Y), 4) + "," +
-    String(accel.axisAccel(Z), 4) + "," +
+    String(x) + "," +
+    String(y) + "," +
+    String(z) + "," +
+    String(magnitude) + "," +
     String(sgp30.CO2) + "," +
     String(sgp30.TVOC);
   Serial.println(String(millis()) + " Finished measuring sensors");
@@ -78,7 +86,7 @@ void initializeSensors() {
     sgp30.initAirQuality();
   }
 
-  if(accel.begin(6.25, 8) != 0 ) { // 6.25Hz sample rate, 8g range. anything over 8g is innacurate
+  if(accel.begin(12.5, 8) != 0 ) { // 12.5Hz sample rate, 16g range. anything over 8g is innacurate
     log("IMU not found");
   } else {
     log("IMU found");
